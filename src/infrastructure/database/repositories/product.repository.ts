@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
-import { DataSource, EntityManager, Repository } from 'typeorm';
+import { Inject, Injectable } from '@nestjs/common';
+import { DataSource, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import {
   ProductFilter,
   PaginationOptions,
@@ -16,14 +17,12 @@ export class ProductRepository
   implements IProductRepository
 {
   constructor(
-    repository: Repository<ProductEntity> | EntityManager,
-    dataSource: DataSource,
+    @InjectRepository(ProductEntity)
+    repository: Repository<ProductEntity>,
+    @Inject('DATA_SOURCE')
+    private dataSource: DataSource,
   ) {
-    const repo =
-      repository instanceof EntityManager
-        ? repository.getRepository(ProductEntity)
-        : repository;
-    super(repo, repository instanceof EntityManager ? repository : undefined);
+    super(repository, undefined);
   }
 
   async findWithFilters(

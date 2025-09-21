@@ -1,5 +1,6 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { DataSource, QueryRunner } from 'typeorm';
+import { DataSource, QueryRunner, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import { IUnitOfWork } from '@application/interfaces/unit-of-work.interface';
 import { IUserRepository } from '@domain/repositories/user.repository.interface';
 import { IProductRepository } from '@domain/repositories/product.repository.interface';
@@ -7,6 +8,9 @@ import { ICategoryRepository } from '@domain/repositories/category.repository.in
 import { UserRepository } from '@infrastructure/database/repositories/user.repository';
 import { ProductRepository } from '@infrastructure/database/repositories/product.repository';
 import { CategoryRepository } from '@infrastructure/database/repositories/category.repository';
+import { UserEntity } from '@infrastructure/database/entities/user.entity';
+import { ProductEntity } from '@infrastructure/database/entities/product.entity';
+import { CategoryEntity } from '@infrastructure/database/entities/category.entity';
 
 @Injectable()
 export class UnitOfWork implements IUnitOfWork {
@@ -15,7 +19,16 @@ export class UnitOfWork implements IUnitOfWork {
   private _productRepository: IProductRepository | null = null;
   private _categoryRepository: ICategoryRepository | null = null;
 
-  constructor(@Inject('DATA_SOURCE') private readonly dataSource: DataSource) {}
+  constructor(
+    @Inject('DATA_SOURCE')
+    private readonly dataSource: DataSource,
+    @InjectRepository(UserEntity)
+    private readonly userRepository: Repository<UserEntity>,
+    @InjectRepository(ProductEntity)
+    private readonly productRepository: Repository<ProductEntity>,
+    @InjectRepository(CategoryEntity)
+    private readonly categoryRepository: Repository<CategoryEntity>,
+  ) {}
 
   // ============================================
   // REPOSITORY GETTERS WITH TRANSACTION SUPPORT
@@ -26,9 +39,10 @@ export class UnitOfWork implements IUnitOfWork {
       if (!this.dataSource) {
         throw new Error('DataSource is not initialized');
       }
-      const entityManager =
-        this.queryRunner?.manager || this.dataSource.manager;
-      this._userRepository = new UserRepository(entityManager, this.dataSource);
+      const repository = this.queryRunner
+        ? this.queryRunner.manager.getRepository(UserEntity)
+        : this.userRepository;
+      this._userRepository = new UserRepository(repository, this.dataSource);
     }
     return this._userRepository;
   }
@@ -38,10 +52,11 @@ export class UnitOfWork implements IUnitOfWork {
       if (!this.dataSource) {
         throw new Error('DataSource is not initialized');
       }
-      const entityManager =
-        this.queryRunner?.manager || this.dataSource.manager;
+      const repository = this.queryRunner
+        ? this.queryRunner.manager.getRepository(ProductEntity)
+        : this.productRepository;
       this._productRepository = new ProductRepository(
-        entityManager,
+        repository,
         this.dataSource,
       );
     }
@@ -53,10 +68,11 @@ export class UnitOfWork implements IUnitOfWork {
       if (!this.dataSource) {
         throw new Error('DataSource is not initialized');
       }
-      const entityManager =
-        this.queryRunner?.manager || this.dataSource.manager;
+      const repository = this.queryRunner
+        ? this.queryRunner.manager.getRepository(CategoryEntity)
+        : this.categoryRepository;
       this._categoryRepository = new CategoryRepository(
-        entityManager,
+        repository,
         this.dataSource,
       );
     }

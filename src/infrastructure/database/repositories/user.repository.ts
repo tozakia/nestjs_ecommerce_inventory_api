@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
-import { DataSource, EntityManager, Repository } from 'typeorm';
+import { Inject, Injectable } from '@nestjs/common';
+import { DataSource, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '@domain/entities/user.entity';
 import { IUserRepository } from '@domain/repositories/user.repository.interface';
 import { BaseRepository } from '@infrastructure/database/repositories/base.repository';
@@ -11,14 +12,12 @@ export class UserRepository
   implements IUserRepository
 {
   constructor(
-    repository: Repository<UserEntity> | EntityManager,
-    dataSource: DataSource,
+    @InjectRepository(UserEntity)
+    repository: Repository<UserEntity>,
+    @Inject('DATA_SOURCE')
+    private dataSource: DataSource,
   ) {
-    const repo =
-      repository instanceof EntityManager
-        ? repository.getRepository(UserEntity)
-        : repository;
-    super(repo, repository instanceof EntityManager ? repository : undefined);
+    super(repository, undefined);
   }
 
   async findByEmail(email: string): Promise<User | null> {

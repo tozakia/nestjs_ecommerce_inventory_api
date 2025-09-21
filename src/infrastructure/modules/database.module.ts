@@ -10,6 +10,11 @@ import { UserEntity } from '@infrastructure/database/entities/user.entity';
 import { ProductEntity } from '@infrastructure/database/entities/product.entity';
 import { CategoryEntity } from '@infrastructure/database/entities/category.entity';
 
+// Repository implementations
+import { UserRepository } from '@infrastructure/database/repositories/user.repository';
+import { ProductRepository } from '@infrastructure/database/repositories/product.repository';
+import { CategoryRepository } from '@infrastructure/database/repositories/category.repository';
+
 // Unit of Work
 import { UnitOfWork } from '@infrastructure/database/unit-of-work';
 
@@ -60,14 +65,43 @@ import { UnitOfWork } from '@infrastructure/database/unit-of-work';
       },
     },
 
+    // Repository implementations
+    {
+      provide: 'IUserRepository',
+      useClass: UserRepository,
+    },
+    {
+      provide: 'IProductRepository',
+      useClass: ProductRepository,
+    },
+    {
+      provide: 'ICategoryRepository',
+      useClass: CategoryRepository,
+    },
+
     // Unit of Work implementation
     {
       provide: 'IUnitOfWork',
       useClass: UnitOfWork,
     },
 
+    // Direct repository providers for injection
+    UserRepository,
+    ProductRepository,
+    CategoryRepository,
     UnitOfWork,
   ],
-  exports: ['DATA_SOURCE', UnitOfWork, TypeOrmModule],
+  exports: [
+    'DATA_SOURCE',
+    'IUserRepository',
+    'IProductRepository',
+    'ICategoryRepository',
+    'IUnitOfWork',
+    UserRepository,
+    ProductRepository,
+    CategoryRepository,
+    UnitOfWork,
+    TypeOrmModule,
+  ],
 })
 export class DatabaseModule {}

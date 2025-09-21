@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
-import { DataSource, EntityManager, Repository } from 'typeorm';
+import { Inject, Injectable } from '@nestjs/common';
+import { DataSource, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import { ICategoryRepository } from '@domain/repositories/category.repository.interface';
 import { BaseRepository } from '@infrastructure/database/repositories/base.repository';
 import { CategoryEntity } from '@infrastructure/database/entities/category.entity';
@@ -10,14 +11,13 @@ export class CategoryRepository
   implements ICategoryRepository
 {
   constructor(
-    repository: Repository<CategoryEntity> | EntityManager,
-    dataSource: DataSource,
+    @InjectRepository(CategoryEntity)
+    repository: Repository<CategoryEntity>,
+    @Inject('DATA_SOURCE')
+    private dataSource: DataSource,
   ) {
-    const repo =
-      repository instanceof EntityManager
-        ? repository.getRepository(CategoryEntity)
-        : repository;
-    super(repo, repository instanceof EntityManager ? repository : undefined);
+    const repo = repository;
+    super(repo, undefined);
   }
 
   async findByName(name: string): Promise<CategoryEntity | null> {
