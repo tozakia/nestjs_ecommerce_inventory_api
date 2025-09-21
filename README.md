@@ -2,6 +2,8 @@
 
 A robust RESTful API for e-commerce inventory management built with NestJS, TypeScript, and PostgreSQL, following Domain-Driven Design (DDD) architecture patterns.
 
+- Live URL: https://nestjs-ecommerce-inventory-api.onrender.com/api/docs
+
 ## Prerequisites
 
 - Node.js >= 18.x
