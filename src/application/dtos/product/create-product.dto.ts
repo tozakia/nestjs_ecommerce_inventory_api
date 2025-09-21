@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 import { IsString, IsNumber, IsOptional, Min, IsInt } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -30,4 +30,9 @@ export class CreateProductDto {
   @IsInt()
   @Type(() => Number)
   categoryId: number;
+}
+
+export class CreateProductWithImageDto extends PartialType(CreateProductDto) {
+  @ApiProperty({ type: 'string', format: 'binary', required: false })
+  image?: any;
 }

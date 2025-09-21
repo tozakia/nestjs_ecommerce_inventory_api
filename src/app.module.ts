@@ -5,6 +5,7 @@ import { PassportModule } from '@nestjs/passport';
 
 // Infrastructure modules
 import { DatabaseModule } from '@infrastructure/modules/database.module';
+import { StorageModule } from '@infrastructure/modules/storage.module';
 
 // Application layer
 import { AuthService } from '@application/services/auth.service';
@@ -42,6 +43,7 @@ import { JwtRefreshStrategy } from '@presentation/strategies/jwt-refresh.strateg
 
     // Infrastructure modules
     DatabaseModule,
+    StorageModule,
 
     // Auth modules
     PassportModule.register({ defaultStrategy: 'jwt' }),

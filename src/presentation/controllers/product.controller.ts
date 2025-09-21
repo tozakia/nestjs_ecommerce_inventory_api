@@ -11,14 +11,22 @@ import {
   ParseIntPipe,
   HttpCode,
   HttpStatus,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
+  ApiBody,
+  ApiConsumes,
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { CreateProductDto } from '@application/dtos/product/create-product.dto';
+import {
+  CreateProductDto,
+  CreateProductWithImageDto,
+} from '@application/dtos/product/create-product.dto';
 import { UpdateProductDto } from '@application/dtos/product/update-product.dto';
 import { ProductFilterDto } from '@application/dtos/product/product-filter.dto';
 import { ProductResponseDto } from '@application/dtos/product/product-response.dto';
@@ -37,7 +45,10 @@ export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
   @Post()
+  @UseInterceptors(FileInterceptor('image'))
+  @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Create a new product' })
+  @ApiBody({ type: CreateProductWithImageDto })
   @ApiResponse({
     status: 201,
     description: 'Product created successfully',
@@ -46,8 +57,9 @@ export class ProductController {
   @ApiResponse({ status: 404, description: 'Category not found' })
   async create(
     @Body() createProductDto: CreateProductDto,
+    @UploadedFile() image?: Express.Multer.File,
   ): Promise<ProductResponseDto | null> {
-    return this.productService.create(createProductDto);
+    return this.productService.create(createProductDto, image);
   }
 
   @Get()
@@ -93,7 +105,10 @@ export class ProductController {
   }
 
   @Patch(':id')
+  @UseInterceptors(FileInterceptor('image'))
+  @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Update product' })
+  @ApiBody({ type: CreateProductWithImageDto })
   @ApiResponse({
     status: 200,
     description: 'Product updated successfully',
@@ -103,8 +118,9 @@ export class ProductController {
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateProductDto: UpdateProductDto,
+    @UploadedFile() image?: Express.Multer.File,
   ): Promise<ProductResponseDto | null> {
-    return this.productService.update(id, updateProductDto);
+    return this.productService.update(id, updateProductDto, image);
   }
 
   @Delete(':id')

@@ -11,7 +11,10 @@ import {
   ProductFilter,
 } from '@domain/value-objects/pagination.vo';
 import { UnitOfWork } from '@infrastructure/database/unit-of-work';
+
 import type { IUnitOfWork } from '@application/interfaces/unit-of-work.interface';
+import type { IStorageService } from '@application/interfaces/storage.service.interface';
+
 import { CreateProductDto } from '@application/dtos/product/create-product.dto';
 import { UpdateProductDto } from '@application/dtos/product/update-product.dto';
 import { ProductFilterDto } from '@application/dtos/product/product-filter.dto';
@@ -22,9 +25,14 @@ export class ProductService {
   constructor(
     @Inject(UnitOfWork)
     private readonly unitOfWork: IUnitOfWork,
+    @Inject('IStorageService')
+    private readonly storageService: IStorageService,
   ) {}
 
-  async create(createProductDto: CreateProductDto): Promise<Product | null> {
+  async create(
+    createProductDto: CreateProductDto,
+    image?: Express.Multer.File,
+  ): Promise<Product | null> {
     // Verify category exists
     const category = await this.unitOfWork.categories.findById(
       createProductDto.categoryId,
@@ -34,6 +42,9 @@ export class ProductService {
     }
 
     let imageUrl: string | undefined;
+    if (image) {
+      imageUrl = await this.storageService.uploadFile(image, 'products');
+    }
 
     const product = await this.unitOfWork.products.create({
       ...createProductDto,
@@ -65,6 +76,7 @@ export class ProductService {
   async update(
     id: number,
     updateProductDto: UpdateProductDto,
+    image?: Express.Multer.File,
   ): Promise<Product | null> {
     const product = await this.unitOfWork.products.findById(id);
     if (!product) {
@@ -80,7 +92,14 @@ export class ProductService {
       }
     }
 
-    let imageUrl: string | undefined;
+    let imageUrl = product.imageUrl;
+    if (image) {
+      // Delete old image if exists
+      if (product.imageUrl) {
+        await this.storageService.deleteFile(product.imageUrl);
+      }
+      imageUrl = await this.storageService.uploadFile(image, 'products');
+    }
 
     return await this.unitOfWork.products.update(id, {
       ...updateProductDto,
@@ -92,6 +111,10 @@ export class ProductService {
     const product = await this.unitOfWork.products.findById(id);
     if (!product) {
       throw new NotFoundException('Product not found');
+    }
+
+    if (product.imageUrl) {
+      await this.storageService.deleteFile(product.imageUrl);
     }
 
     await this.unitOfWork.products.delete(id);
