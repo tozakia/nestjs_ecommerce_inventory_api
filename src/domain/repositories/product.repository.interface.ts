@@ -11,12 +11,10 @@ export interface IProductRepository extends IBaseRepository<Product> {
     filters: ProductFilter,
     pagination: PaginationOptions,
   ): Promise<PaginationResult<Product>>;
-
   searchProducts(
     query: string,
     pagination: PaginationOptions,
   ): Promise<PaginationResult<Product>>;
-
   findByCategoryId(categoryId: number): Promise<Product[]>;
   findByIdWithCategory(categoryId: number): Promise<Product | null>;
   updateStock(id: number, quantity: number): Promise<void>;

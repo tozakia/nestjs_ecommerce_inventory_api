@@ -3,7 +3,7 @@ import {
   Get,
   Post,
   Body,
-  Put,
+  Patch,
   Param,
   Delete,
   UseGuards,
@@ -74,7 +74,7 @@ export class CategoryController {
     return this.categoryService.findOne(id);
   }
 
-  @Put(':id')
+  @Patch(':id')
   @ApiOperation({ summary: 'Update category' })
   @ApiResponse({
     status: 200,
@@ -89,7 +89,7 @@ export class CategoryController {
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateCategoryDto: UpdateCategoryDto,
-  ): Promise<CategoryResponseDto> {
+  ): Promise<CategoryResponseDto | null> {
     return this.categoryService.update(id, updateCategoryDto);
   }
 

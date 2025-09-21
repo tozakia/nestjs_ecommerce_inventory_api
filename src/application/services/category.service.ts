@@ -45,7 +45,7 @@ export class CategoryService {
   async update(
     id: number,
     updateCategoryDto: UpdateCategoryDto,
-  ): Promise<Category> {
+  ): Promise<Category | null> {
     const category = await this.unitOfWork.categories.findById(id);
     if (!category) {
       throw new NotFoundException('Category not found');
