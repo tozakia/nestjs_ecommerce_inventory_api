@@ -11,7 +11,7 @@ export interface PaginationResult<T> {
   totalPages: number;
 }
 
-export interface ProductFilter extends PaginationOptions {
+export interface ProductFilter {
   categoryId?: number;
   minPrice?: number;
   maxPrice?: number;

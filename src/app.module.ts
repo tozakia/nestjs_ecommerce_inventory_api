@@ -1,35 +1,33 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 
-import { UserEntity } from '@infrastructure/database/entities/user.entity';
-import { ProductEntity } from '@infrastructure/database/entities/product.entity';
-import { CategoryEntity } from '@infrastructure/database/entities/category.entity';
+// Infrastructure modules
+import { DatabaseModule } from '@infrastructure/modules/database.module';
+
+// Application layer
+import { CategoryService } from '@application/services/category.service';
+import { ProductService } from '@application/services/product.service';
+
+// Presentation layer
+import { CategoryController } from '@presentation/controllers/category.controller';
+import { ProductController } from '@presentation/controllers/product.controller';
 
 @Module({
   imports: [
     // Configuration
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      envFilePath: ['.env.local', '.env'],
     }),
 
-    // Database
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get('DB_HOST'),
-        port: configService.get('DB_PORT'),
-        database: configService.get('DB_NAME'),
-        username: configService.get('DB_USER'),
-        password: configService.get('DB_PASSWORD'),
-        entities: [UserEntity, ProductEntity, CategoryEntity],
-        synchronize: configService.get('NODE_ENV') === 'development',
-        logging: configService.get('NODE_ENV') === 'development',
-      }),
-    }),
+    // Infrastructure modules
+    DatabaseModule,
+  ],
+  providers: [CategoryService, ProductService],
+  controllers: [
+    // AuthController,
+    CategoryController,
+    ProductController,
   ],
 })
 export class AppModule {}

@@ -14,9 +14,9 @@ async function bootstrap() {
     .setDescription('RESTful API for e-commerce inventory management')
     .setVersion('1.0')
     .addBearerAuth()
-    .addTag('auth', 'Authentication endpoints')
-    .addTag('products', 'Product management endpoints')
-    .addTag('categories', 'Category management endpoints')
+    .addTag('Auth', 'Authentication endpoints')
+    .addTag('Products', 'Product management endpoints')
+    .addTag('Categories', 'Category management endpoints')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
