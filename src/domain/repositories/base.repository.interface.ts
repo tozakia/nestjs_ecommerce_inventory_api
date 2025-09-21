@@ -6,7 +6,7 @@ export interface IBaseRepository<T, TId = number> {
   findOne(where: FindOptionsWhere<T>): Promise<T | null>;
   findMany(where: FindOptionsWhere<T>): Promise<T[]>;
   create(entity: Partial<T>): Promise<T>;
-  update(id: TId, entity: Partial<T>): Promise<T | null>;
+  update(id: TId, entity: Partial<T>): Promise<T>;
   delete(id: TId): Promise<boolean>;
   exists(id: TId): Promise<boolean>;
   count(where?: FindOptionsWhere<T>): Promise<number>;

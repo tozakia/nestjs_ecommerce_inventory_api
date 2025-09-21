@@ -27,6 +27,55 @@ export class CategoryService {
       throw new ConflictException('Category with this name already exists');
     }
 
-    return this.unitOfWork.categories.create(createCategoryDto);
+    return await this.unitOfWork.categories.create(createCategoryDto);
+  }
+
+  async findAll(): Promise<Category[]> {
+    return await this.unitOfWork.categories.findAllWithProductCount();
+  }
+
+  async findOne(id: number): Promise<Category> {
+    const category = await this.unitOfWork.categories.findById(id);
+    if (!category) {
+      throw new NotFoundException('Category not found');
+    }
+    return category;
+  }
+
+  async update(
+    id: number,
+    updateCategoryDto: UpdateCategoryDto,
+  ): Promise<Category> {
+    const category = await this.unitOfWork.categories.findById(id);
+    if (!category) {
+      throw new NotFoundException('Category not found');
+    }
+
+    if (updateCategoryDto.name && updateCategoryDto.name !== category.name) {
+      const existing = await this.unitOfWork.categories.findByName(
+        updateCategoryDto.name,
+      );
+      if (existing) {
+        throw new ConflictException('Category with this name already exists');
+      }
+    }
+
+    return await this.unitOfWork.categories.update(id, updateCategoryDto);
+  }
+
+  async remove(id: number): Promise<void> {
+    const category = await this.unitOfWork.categories.findById(id);
+    if (!category) {
+      throw new NotFoundException('Category not found');
+    }
+
+    const hasProducts = await this.unitOfWork.categories.hasProducts(id);
+    if (hasProducts) {
+      throw new BadRequestException(
+        'Cannot delete category with existing products',
+      );
+    }
+
+    await this.unitOfWork.categories.delete(id);
   }
 }
